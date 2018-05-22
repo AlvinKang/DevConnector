@@ -42,6 +42,66 @@ router.get(
   }
 );
 
+// @route   POST api/profile/all
+// @desc    Get ALL profiles
+// @access  Public
+router.get("/all", (req, res) => {
+  const errors = {};
+  // Not findOne because we want ALL the profiles
+  Profile.find()
+    .populate("user", ["name", "avatar"])
+    .then(profiles => {
+      if (!profiles) {
+        errors.noprofile = "There is no profile for this user";
+        return res.status(404).json(errors);
+      }
+      res.json(profiles);
+    })
+    .catch(err => {
+      res.json(404).json({ profiles: "There are no profiles" });
+    });
+});
+
+// @route   GET api/profile/handle/:handle
+// @desc    Get profile by handle
+// @access  Public
+router.get("/handle/:handle", (req, res) => {
+  const errors = {};
+  // Use params to get placeholder (:handle) in this case
+  Profile.findOne({ handle: req.params.handle })
+    .populate("user", ["name", "avatar"]) // fetch user info based on handle
+    .then(profile => {
+      if (!profile) {
+        errors.noprofile = "There is no profile for this user";
+        res.status(404).json(errors);
+      }
+      res.json(profile);
+    })
+    .catch(err => {
+      res.status(404).json(err);
+    });
+});
+
+// @route   GET api/profile/user/:user_id
+// @desc    Get profile by user id
+// @access  Public
+router.get("/user/:user_id", (req, res) => {
+  const errors = {};
+  // Use params to get placeholder (:user_id) in this case
+  Profile.findOne({ user: req.params.user_id })
+    .populate("user", ["name", "avatar"]) // fetch user info based on handle
+    .then(profile => {
+      if (!profile) {
+        errors.noprofile = "There is no profile for this user";
+        res.status(404).json(errors);
+      }
+      res.json(profile);
+    })
+    .catch(err => {
+      res.status(404).json({ profile: "There is no profile for this user" });
+    });
+});
+
 // @route   POST api/profile/
 // @desc    Create or edit user profile
 // @access  Private
