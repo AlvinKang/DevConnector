@@ -9,6 +9,9 @@ const validatePostInput = require("../../validation/post");
 // Load Post model
 const Post = require("../../models/Post");
 
+// Load Profile model
+const Profile = require("../../models/Profile");
+
 // @route   GET api/posts/test
 // @desc    Tests posts route
 // @access  Public
@@ -61,6 +64,33 @@ router.post(
     });
     // Save to DB
     newPost.save().then(post => res.json(post));
+  }
+);
+
+// @route   DELETE api/posts/:id
+// @desc    Delete post
+// @access  Private
+router.delete(
+  "/:id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOne({ user: req.user.id }).then(profile => {
+      Post.findById(req.params.id).then(post => {
+        // Check that post owner is the logged in user
+        if (post.user.toString() !== req.user.id) {
+          // Status code 401 for unauthorized
+          return res.status(401).json({ notauthorized: "User not authorized" });
+        }
+
+        // Delete post
+        post
+          .remove()
+          .then(() => res.json({ sucess: true }))
+          .catch(err =>
+            res.status(404).json({ postnotfound: "No post found" })
+          );
+      });
+    });
   }
 );
 
