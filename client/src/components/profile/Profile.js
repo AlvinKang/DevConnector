@@ -17,6 +17,14 @@ class Profile extends Component {
       this.props.getProfileByHandle(this.props.match.params.handle);
     }
   }
+
+  // If profile doesn't exist redirect to not-found page
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.profile.profile === null && this.props.profile.loading) {
+      this.props.history.push("/not-found");
+    }
+  }
+
   render() {
     const { profile, loading } = this.props.profile;
 
